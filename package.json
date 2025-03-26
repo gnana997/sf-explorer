@@ -1,0 +1,57 @@
+{
+  "name": "sfdc-extension",
+  "displayName": "Salesforce SOQL Query Runner",
+  "description": "Run SOQL queries in VSCode with authentication",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:sfdc-extension.login",
+    "onCommand:sfdc-extension.runQuery"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sfdc-extension.login",
+        "title": "SFDC: Login"
+      },
+      {
+        "command": "sfdc-extension.runQuery",
+        "title": "SFDC: Run SOQL Query"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "sfdc-extension.runQuery",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "@types/jsforce": "^1.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "jsforce": "^1.11.0"
+  }
+} 
