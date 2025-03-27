@@ -4,9 +4,12 @@ This VSCode extension allows you to run SOQL queries directly from your editor. 
 
 ## Features
 
-- Salesforce authentication using username and password
+- Support for multiple Salesforce environments (Production, Sandboxes, etc.)
+- Secure credential storage using VSCode's global state
+- Visual environment management in the side panel
 - Execute SOQL queries directly from VSCode
 - View query results in a formatted table
+- Automatic connection management and status tracking
 - Support for all standard SOQL queries
 
 ## Installation
@@ -17,14 +20,16 @@ This VSCode extension allows you to run SOQL queries directly from your editor. 
 
 ## Usage
 
-1. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac) to open the command palette
-2. Type "SFDC: Login" and select it to authenticate with Salesforce
-3. Enter your Salesforce username and password when prompted
-4. Once logged in, you can run queries by:
-   - Opening the command palette again
-   - Typing "SFDC: Run Query" and selecting it
-   - Enter your SOQL query when prompted
-5. The results will be displayed in a new tab in a formatted table
+1. Click the Salesforce icon in the activity bar to open the environments panel
+2. Click the "+" button to add a new environment
+3. Fill in the environment details:
+   - Environment name (e.g., "Production", "Sandbox", "Dev")
+   - Login URL (e.g., "https://login.salesforce.com" for production)
+   - Username and password
+4. Right-click on an environment to:
+   - Set it as active
+   - Remove it
+5. Use the "Run SOQL Query" command to execute queries against the active environment
 
 ## Example Queries
 
@@ -36,10 +41,31 @@ SELECT Id, Name, Industry FROM Account WHERE Industry = 'Technology'
 
 ## Security Note
 
-This extension stores your credentials in memory only and logs out when the extension is deactivated. However, it's recommended to use a secure connection and follow Salesforce's security best practices.
+This extension stores your credentials securely in VSCode's global state. Credentials are only stored locally and are not transmitted to any external servers. The extension automatically handles connection management and provides visual indicators for stale connections.
 
 ## Requirements
 
 - VSCode 1.85.0 or higher
 - Node.js and npm installed
-- Salesforce account with API access 
+- Salesforce account with API access
+
+## Changelog
+
+### v0.0.1 (Initial Release)
+- Added support for multiple Salesforce environments
+- Implemented secure credential storage
+- Added visual environment management in side panel
+- Added connection status tracking
+- Added automatic connection refresh
+- Added warning indicators for stale connections
+- Added support for custom login URLs (for sandboxes)
+- Added modern webview forms for environment management
+- Added query results display in formatted table
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This extension is licensed under the MIT License - see the LICENSE file for details. 
