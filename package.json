@@ -10,11 +10,32 @@
     "Other"
   ],
   "activationEvents": [
+    "onView:sfdcEnvironments",
     "onCommand:sfdc-extension.login",
-    "onCommand:sfdc-extension.runQuery"
+    "onCommand:sfdc-extension.runQuery",
+    "onCommand:sfdc-extension.addEnvironment",
+    "onCommand:sfdc-extension.removeEnvironment",
+    "onCommand:sfdc-extension.setActiveEnvironment"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sfdc-explorer",
+          "title": "Salesforce Explorer",
+          "icon": "media/salesforce.svg"
+        }
+      ]
+    },
+    "views": {
+      "sfdc-explorer": [
+        {
+          "id": "sfdcEnvironments",
+          "name": "Environments"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "sfdc-extension.login",
@@ -23,9 +44,40 @@
       {
         "command": "sfdc-extension.runQuery",
         "title": "SFDC: Run SOQL Query"
+      },
+      {
+        "command": "sfdc-extension.addEnvironment",
+        "title": "SFDC: Add Environment"
+      },
+      {
+        "command": "sfdc-extension.removeEnvironment",
+        "title": "SFDC: Remove Environment"
+      },
+      {
+        "command": "sfdc-extension.setActiveEnvironment",
+        "title": "SFDC: Set as Active Environment"
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "sfdc-extension.addEnvironment",
+          "group": "navigation",
+          "when": "view == sfdcEnvironments"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "sfdc-extension.setActiveEnvironment",
+          "group": "inline",
+          "when": "view == sfdcEnvironments"
+        },
+        {
+          "command": "sfdc-extension.removeEnvironment",
+          "group": "inline",
+          "when": "view == sfdcEnvironments"
+        }
+      ],
       "editor/context": [
         {
           "command": "sfdc-extension.runQuery",
