@@ -6,6 +6,7 @@ interface SalesforceEnvironment {
     name: string;
     username: string;
     password: string;
+    securityToken?: string;
     instanceUrl: string;
     isActive: boolean;
     lastConnected?: Date;
@@ -74,12 +75,18 @@ class SalesforceEnvironmentProvider implements vscode.TreeDataProvider<Salesforc
                 loginUrl: data.url
             });
 
-            await conn.login(data.username, data.password);
+            // Combine password and security token if provided
+            const passwordWithToken = data.securityToken 
+                ? data.password + data.securityToken 
+                : data.password;
+
+            await conn.login(data.username, passwordWithToken);
             
             const environment: SalesforceEnvironment = {
                 name: data.name,
                 username: data.username,
                 password: data.password,
+                securityToken: data.securityToken,
                 instanceUrl: conn.instanceUrl,
                 isActive: this.environments.length === 0,
                 lastConnected: new Date()
@@ -121,7 +128,12 @@ class SalesforceEnvironmentProvider implements vscode.TreeDataProvider<Salesforc
                 loginUrl: environment.instanceUrl
             });
 
-            await conn.login(environment.username, environment.password);
+            // Combine password and security token if provided
+            const passwordWithToken = environment.securityToken 
+                ? environment.password + environment.securityToken 
+                : environment.password;
+
+            await conn.login(environment.username, passwordWithToken);
             environment.lastConnected = new Date();
             this.saveEnvironments();
             this._onDidChangeTreeData.fire();
@@ -209,7 +221,12 @@ export function activate(context: vscode.ExtensionContext) {
                 loginUrl: activeEnvironment.instanceUrl
             });
 
-            await conn.login(activeEnvironment.username, activeEnvironment.password);
+            // Combine password and security token if provided
+            const passwordWithToken = activeEnvironment.securityToken 
+                ? activeEnvironment.password + activeEnvironment.securityToken 
+                : activeEnvironment.password;
+
+            await conn.login(activeEnvironment.username, passwordWithToken);
             const result = await conn.query<SalesforceRecord>(query) as QueryResult;
             showQueryResults(result);
         } catch (error: unknown) {

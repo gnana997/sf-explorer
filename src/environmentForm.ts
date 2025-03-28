@@ -103,6 +103,11 @@ export class EnvironmentFormProvider {
                         margin-top: 5px;
                         display: none;
                     }
+                    .help-text {
+                        font-size: 0.9em;
+                        color: var(--vscode-descriptionForeground);
+                        margin-top: 4px;
+                    }
                 </style>
             </head>
             <body>
@@ -115,6 +120,7 @@ export class EnvironmentFormProvider {
                     <div class="form-group">
                         <label for="url">Login URL</label>
                         <input type="url" id="url" required placeholder="https://login.salesforce.com">
+                        <div class="help-text">For sandboxes, use: https://test.salesforce.com</div>
                         <div class="error" id="urlError"></div>
                     </div>
                     <div class="form-group">
@@ -126,6 +132,12 @@ export class EnvironmentFormProvider {
                         <label for="password">Password</label>
                         <input type="password" id="password" required>
                         <div class="error" id="passwordError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="securityToken">Security Token (Optional)</label>
+                        <input type="password" id="securityToken" placeholder="Enter security token for sandbox access">
+                        <div class="help-text">Required for sandbox access. You can reset your security token from Salesforce settings.</div>
+                        <div class="error" id="securityTokenError"></div>
                     </div>
                     <div class="button-group">
                         <button type="button" class="cancel-btn" onclick="cancel()">Cancel</button>
@@ -143,7 +155,8 @@ export class EnvironmentFormProvider {
                             name: document.getElementById('name').value,
                             url: document.getElementById('url').value,
                             username: document.getElementById('username').value,
-                            password: document.getElementById('password').value
+                            password: document.getElementById('password').value,
+                            securityToken: document.getElementById('securityToken').value
                         };
 
                         vscode.postMessage({
@@ -180,4 +193,5 @@ export interface EnvironmentFormData {
     url: string;
     username: string;
     password: string;
+    securityToken?: string;
 } 
