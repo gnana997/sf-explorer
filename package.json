@@ -1,9 +1,9 @@
 {
-  "name": "sf-explorer",
-  "displayName": "sf-explorer",
+  "name": "sfdc-explorer",
+  "displayName": "SFDC Explorer",
   "publisher": "Gnana997",
   "description": "Run SOQL queries in VSCode with authentication",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -26,7 +26,8 @@
     "onCommand:sfdc-extension.runQuery",
     "onCommand:sfdc-extension.addEnvironment",
     "onCommand:sfdc-extension.removeEnvironment",
-    "onCommand:sfdc-extension.setActiveEnvironment"
+    "onCommand:sfdc-extension.setActiveEnvironment",
+    "onCommand:sfdc-extension.disconnectEnvironment"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -67,6 +68,10 @@
       {
         "command": "sfdc-extension.setActiveEnvironment",
         "title": "SFDC: Set as Active Environment"
+      },
+      {
+        "command": "sfdc-extension.disconnectEnvironment",
+        "title": "SFDC: Disconnect Environment"
       }
     ],
     "menus": {
@@ -82,6 +87,11 @@
           "command": "sfdc-extension.setActiveEnvironment",
           "group": "inline",
           "when": "view == sfdcEnvironments"
+        },
+        {
+          "command": "sfdc-extension.disconnectEnvironment",
+          "group": "inline",
+          "when": "view == sfdcEnvironments && viewItem =~ /connected/i"
         },
         {
           "command": "sfdc-extension.removeEnvironment",

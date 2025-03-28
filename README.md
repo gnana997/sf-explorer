@@ -1,109 +1,111 @@
-# Salesforce SOQL Query Runner VSCode Extension
+# Salesforce Extension for VS Code
 
-A powerful VSCode extension for Salesforce developers that provides seamless integration with Salesforce orgs directly from your editor. This extension allows you to manage multiple Salesforce environments, explore object metadata, and execute SOQL queries with ease.
-
-> **Preview Mode**: This extension is currently in preview and actively under development. While core features are stable, we're continuously adding new capabilities to enhance your Salesforce development experience.
+A Visual Studio Code extension that allows you to connect to Salesforce environments and run SOQL queries directly from your editor.
 
 ## Features
 
-### Current Features
-- **Multi-Environment Support**
-  - Connect to multiple Salesforce environments (Production, Sandboxes, etc.)
-  - Secure credential storage using VSCode's global state
-  - Visual environment management in the side panel
-  - Automatic connection management and status tracking
-  - Warning indicators for stale connections
-
-- **SOQL Query Execution**
-  - Run SOQL queries directly from VSCode
-  - View query results in a formatted table
-  - Support for all standard SOQL queries
-  - Query history tracking
-
-### Coming Soon
-- **Object Explorer**
-  - Browse Salesforce objects and their metadata
-  - View field definitions and relationships
-  - Explore object permissions and sharing rules
-  - Quick access to object documentation
-
-- **Data Export**
-  - Export query results to CSV format
-  - Customizable export options
-  - Batch processing for large datasets
-
-- **Additional Features**
-  - Apex code execution
-  - Deployment management
-  - Custom metadata type explorer
-  - Schema comparison between environments
-  - Query builder with visual interface
+- 🔐 **Secure Login**: Connect to multiple Salesforce environments with secure credential storage
+- 🌐 **Multi-Environment Support**: Manage multiple Salesforce environments (Production, Sandbox, etc.)
+- 🔑 **Security Token Support**: Optional security token for enhanced authentication
+- 🔌 **Connection Status**: Visual indicators for connection status (Connected, Stale, Disconnected)
+- 📊 **SOQL Query Editor**: Write and execute SOQL queries with a dedicated editor
+- 📋 **Query Results**: View query results in a clean, organized table format
+- ⚡ **Real-time Feedback**: Get immediate feedback on query execution and connection status
 
 ## Installation
 
-1. Clone this repository
-2. Run `npm install` to install dependencies
-3. Press F5 to start debugging or package the extension using `vsce package`
+1. Open VS Code
+2. Go to the Extensions view (Ctrl+Shift+X)
+3. Search for "Salesforce Extension"
+4. Click Install
 
 ## Usage
 
-1. Click the Salesforce icon in the activity bar to open the environments panel
+### Managing Environments
+
+1. Click the Salesforce icon in the Activity Bar
 2. Click the "+" button to add a new environment
-3. Fill in the environment details:
-   - Environment name (e.g., "Production", "Sandbox", "Dev")
-   - Login URL (e.g., "https://login.salesforce.com" for production)
-   - Username and password
-4. Right-click on an environment to:
-   - Set it as active
-   - Remove it
-5. Use the "Run SOQL Query" command to execute queries against the active environment
+3. Enter your environment details:
+   - Name (e.g., "Production", "Sandbox")
+   - Username
+   - Password
+   - Security Token (optional)
+   - Instance URL (e.g., https://login.salesforce.com for production)
 
-## Example Queries
+### Running Queries
 
-```sql
-SELECT Id, Name FROM Account LIMIT 10
-SELECT Id, FirstName, LastName FROM Contact WHERE LastName LIKE 'A%'
-SELECT Id, Name, Industry FROM Account WHERE Industry = 'Technology'
-```
+1. Select an active environment from the Salesforce Explorer
+2. Click the "Run SOQL Query" command from the command palette (Ctrl+Shift+P)
+3. Enter your SOQL query in the editor
+4. Click "Run Query" to execute
+5. View results in the organized table format
 
-## Security Note
+## Commands
 
-This extension stores your credentials securely in VSCode's global state. Credentials are only stored locally and are not transmitted to any external servers. The extension automatically handles connection management and provides visual indicators for stale connections.
-
-## Requirements
-
-- VSCode 1.85.0 or higher
-- Node.js and npm installed
-- Salesforce account with API access
+- `SFDC: Add Environment` - Add a new Salesforce environment
+- `SFDC: Remove Environment` - Remove an existing environment
+- `SFDC: Set Active Environment` - Set the currently active environment
+- `SFDC: Disconnect Environment` - Disconnect from the current environment
+- `SFDC: Run SOQL Query` - Open the SOQL query editor
 
 ## Changelog
 
-### v0.0.1 (Preview Release)
-- Added support for multiple Salesforce environments
-- Implemented secure credential storage
-- Added visual environment management in side panel
-- Added connection status tracking
-- Added automatic connection refresh
-- Added warning indicators for stale connections
-- Added support for custom login URLs (for sandboxes)
-- Added modern webview forms for environment management
-- Added query results display in formatted table
+### 0.0.5 (2024-03-21)
+- ✨ Added dedicated SOQL query editor with syntax highlighting
+- 📊 Implemented tabular view for query results
+- 🔄 Added loading indicators for query execution
+- ⚠️ Enhanced error handling and display
+- 🔌 Added disconnect functionality for environments
+- 🕒 Added connection status indicators (Connected, Stale, Disconnected)
+- 🔐 Improved security with secure credential storage
+- 🎨 Added VSCode theme-aware styling for better integration
+
+### 0.0.4 (2024-03-20)
+- 🎨 Added VSCode theme-aware styling for better integration
+- 🔐 Improved security with secure credential storage
+- 🕒 Added connection status indicators (Connected, Stale, Disconnected)
+- 🔌 Added disconnect functionality for environments
+
+### 0.0.3 (2024-03-19)
+- 🔐 Added secure credential storage
+- 🔑 Added support for security tokens
+- 🌐 Added support for multiple environments
+- 🎨 Added VSCode theme-aware styling
+
+### 0.0.2 (2024-03-18)
+- 🔐 Added basic authentication support
+- 🌐 Added support for multiple environments
+- 🎨 Added VSCode theme-aware styling
+
+### 0.0.1 (2024-03-17)
+- 🎨 Added VSCode theme-aware styling
+- 🔐 Added basic authentication support
+- 🌐 Added support for multiple environments
+
+## Requirements
+
+- Visual Studio Code 1.60.0 or higher
+- Node.js 14.0.0 or higher
+- npm 6.0.0 or higher
+
+## Extension Settings
+
+This extension contributes the following settings:
+
+* `sfdc-extension.environments`: List of configured Salesforce environments
+
+## Known Issues
+
+- None reported yet
 
 ## Contributing
 
-We welcome contributions! Please feel free to submit a Pull Request. As this is a preview release, we're particularly interested in feedback and suggestions for new features.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This extension is licensed under the MIT License - see the LICENSE file for details.
-
-## Roadmap
-
-We're actively developing this extension with a focus on:
-1. Object metadata exploration
-2. Data export capabilities
-3. Enhanced query building experience
-4. Schema comparison tools
-5. Deployment management features
-
-Stay tuned for updates as we continue to enhance the extension with new features and improvements. 
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details. 

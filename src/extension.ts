@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as jsforce from 'jsforce';
 import { EnvironmentFormProvider, EnvironmentFormData } from './environmentForm';
+import { QueryEditorProvider } from './queryEditor';
 
 interface SalesforceEnvironment {
     name: string;
@@ -59,7 +60,13 @@ class SalesforceEnvironmentProvider implements vscode.TreeDataProvider<Salesforc
             if (diffHours > 24) {
                 treeItem.iconPath = new vscode.ThemeIcon('warning');
                 treeItem.tooltip = `Last connected: ${lastConnected.toLocaleString()}`;
+            } else {
+                treeItem.iconPath = new vscode.ThemeIcon('check');
+                treeItem.tooltip = `Connected (Last: ${lastConnected.toLocaleString()})`;
             }
+        } else {
+            treeItem.iconPath = new vscode.ThemeIcon('plug');
+            treeItem.tooltip = 'Not connected';
         }
         
         return treeItem;
@@ -143,6 +150,13 @@ class SalesforceEnvironmentProvider implements vscode.TreeDataProvider<Salesforc
         }
     }
 
+    async disconnectEnvironment(environment: SalesforceEnvironment) {
+        environment.lastConnected = undefined;
+        this.saveEnvironments();
+        this._onDidChangeTreeData.fire();
+        vscode.window.showInformationMessage(`Disconnected from environment: ${environment.name}`);
+    }
+
     refresh(): void {
         this._onDidChangeTreeData.fire();
     }
@@ -153,10 +167,48 @@ class SalesforceEnvironmentProvider implements vscode.TreeDataProvider<Salesforc
 }
 
 let environmentProvider: SalesforceEnvironmentProvider;
+let queryEditorProvider: QueryEditorProvider;
 let activeConnection: jsforce.Connection | null = null;
 
 export function activate(context: vscode.ExtensionContext) {
     environmentProvider = new SalesforceEnvironmentProvider(context);
+    queryEditorProvider = new QueryEditorProvider(context.extensionUri, async (query: string) => {
+        const activeEnvironment = environmentProvider.getActiveEnvironment();
+        if (!activeEnvironment) {
+            queryEditorProvider.showError('Please select an active environment first!');
+            return;
+        }
+
+        const isConnected = await environmentProvider.refreshConnection(activeEnvironment);
+        if (!isConnected) {
+            queryEditorProvider.showError(`Failed to connect to environment: ${activeEnvironment.name}`);
+            return;
+        }
+
+        try {
+            const conn = new jsforce.Connection({
+                loginUrl: activeEnvironment.instanceUrl
+            });
+
+            // Combine password and security token if provided
+            const passwordWithToken = activeEnvironment.securityToken 
+                ? activeEnvironment.password + activeEnvironment.securityToken 
+                : activeEnvironment.password;
+
+            await conn.login(activeEnvironment.username, passwordWithToken);
+            const result = await conn.query<SalesforceRecord>(query) as QueryResult;
+            
+            if (result.records.length > 0) {
+                const fields = Object.keys(result.records[0]).filter(key => key !== 'attributes');
+                queryEditorProvider.showResults(result.records, fields);
+            } else {
+                queryEditorProvider.showResults([], []);
+            }
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            queryEditorProvider.showError(`Query failed: ${errorMessage}`);
+        }
+    });
 
     // Register view provider
     const environmentsView = vscode.window.createTreeView('sfdcEnvironments', {
@@ -182,6 +234,11 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // Register disconnect environment command
+    let disconnectEnvironmentCommand = vscode.commands.registerCommand('sfdc-extension.disconnectEnvironment', async (environment: SalesforceEnvironment) => {
+        await environmentProvider.disconnectEnvironment(environment);
+    });
+
     // Register set active environment command
     let setActiveEnvironmentCommand = vscode.commands.registerCommand('sfdc-extension.setActiveEnvironment', async (environment: SalesforceEnvironment) => {
         const isConnected = await environmentProvider.refreshConnection(environment);
@@ -194,109 +251,18 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Register run query command
-    let runQueryCommand = vscode.commands.registerCommand('sfdc-extension.runQuery', async () => {
-        const activeEnvironment = environmentProvider.getActiveEnvironment();
-        if (!activeEnvironment) {
-            vscode.window.showErrorMessage('Please select an active environment first!');
-            return;
-        }
-
-        const isConnected = await environmentProvider.refreshConnection(activeEnvironment);
-        if (!isConnected) {
-            vscode.window.showErrorMessage(`Failed to connect to environment: ${activeEnvironment.name}`);
-            return;
-        }
-
-        const query = await vscode.window.showInputBox({
-            prompt: 'Enter your SOQL query',
-            placeHolder: 'SELECT Id, Name FROM Account LIMIT 10'
-        });
-
-        if (!query) {
-            return;
-        }
-
-        try {
-            const conn = new jsforce.Connection({
-                loginUrl: activeEnvironment.instanceUrl
-            });
-
-            // Combine password and security token if provided
-            const passwordWithToken = activeEnvironment.securityToken 
-                ? activeEnvironment.password + activeEnvironment.securityToken 
-                : activeEnvironment.password;
-
-            await conn.login(activeEnvironment.username, passwordWithToken);
-            const result = await conn.query<SalesforceRecord>(query) as QueryResult;
-            showQueryResults(result);
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-            vscode.window.showErrorMessage(`Query failed: ${errorMessage}`);
-        }
+    let runQueryCommand = vscode.commands.registerCommand('sfdc-extension.runQuery', () => {
+        queryEditorProvider.show();
     });
 
     context.subscriptions.push(
         environmentsView,
         addEnvironmentCommand,
         removeEnvironmentCommand,
+        disconnectEnvironmentCommand,
         setActiveEnvironmentCommand,
         runQueryCommand
     );
-}
-
-function showQueryResults(result: QueryResult) {
-    const panel = vscode.window.createWebviewPanel(
-        'queryResults',
-        'Query Results',
-        vscode.ViewColumn.One,
-        {
-            enableScripts: true
-        }
-    );
-
-    const records = result.records;
-    const fields = records.length > 0 ? Object.keys(records[0]).filter(key => key !== 'attributes') : [];
-
-    const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body { padding: 10px; font-family: Arial, sans-serif; }
-                table { border-collapse: collapse; width: 100%; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f2f2f2; }
-                tr:nth-child(even) { background-color: #f9f9f9; }
-                .header { margin-bottom: 20px; }
-                .total-records { color: #666; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>Query Results</h2>
-                <div class="total-records">Total Records: ${records.length}</div>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        ${fields.map(field => `<th>${field}</th>`).join('')}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${records.map((record: SalesforceRecord) => `
-                        <tr>
-                            ${fields.map(field => `<td>${record[field] || ''}</td>`).join('')}
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </body>
-        </html>
-    `;
-
-    panel.webview.html = html;
-    panel.reveal(vscode.ViewColumn.One);
 }
 
 export function deactivate() {
